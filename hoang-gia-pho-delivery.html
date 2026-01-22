@@ -236,6 +236,8 @@ legend{padding:0 8px;color:var(--gold);font-size:12px}
           <div class="btnrow">
             <button class="primary" onclick="checkoutWhatsApp()">Checkout (WhatsApp)</button>
             <button class="secondary" onclick="checkoutEmail()">Checkout (Email)</button>
+            <!-- v5: e‑Transfer checkout button. Provides instructions to pay via Interac e‑Transfer. -->
+            <button class="secondary" onclick="checkoutEtransfer()">Checkout (e‑Transfer)</button>
           </div>
           <div class="hint" style="margin-top:10px">
             Private delivery ordering. You will receive confirmation after review. Taxes and delivery fee are calculated automatically.
@@ -277,6 +279,9 @@ const state = {
   search: "",
   activeCat: "All"
 };
+
+// Email address to receive e-transfer payments. Update this to your business e-transfer email.
+const ETRANSFER_EMAIL = "orders@hoanggiapho.ca";
 
 function money(n){ return (Math.round(n*100)/100).toFixed(2); }
 function escapeHtml(str){
@@ -633,6 +638,57 @@ function checkoutWhatsApp(){
   ].filter(Boolean).join("\n");
 
   window.open("https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(text), "_blank");
+}
+
+/**
+ * Handle checkout via Interac e‑Transfer.
+ * This function collects the order information, calculates the total (including HST and delivery),
+ * and displays instructions for sending an e‑transfer. It attempts to copy the instructions
+ * to the user’s clipboard for convenience.
+ */
+function checkoutEtransfer(){
+  if(state.cart.length===0){ alert("Add items to your cart first."); return; }
+  if(!validateSchedule()){ alert("Please fix the scheduling requirements shown in the cart."); return; }
+
+  const name = document.getElementById("custName").value.trim();
+  const phone = document.getElementById("custPhone").value.trim();
+  const address = document.getElementById("custAddress").value.trim();
+  const notes = document.getElementById("custNotes").value.trim();
+
+  if(!name || !phone || !address){ alert("Please enter your name, phone, and delivery address."); return; }
+
+  const sub = cartSubtotal();
+  const tax = (sub + DELIVERY_FEE) * HST_RATE;
+  const total = sub + DELIVERY_FEE + tax;
+
+  // Compose the message with order details for the e‑transfer memo
+  const memoLines = [
+    `Name: ${name}`,
+    `Phone: ${phone}`,
+    `Address: ${address}`,
+    notes ? `Notes: ${notes}` : "",
+    `When: ${getWhenText()}`,
+    "",
+    "Items:",
+    orderSummaryText(),
+    "",
+    `Subtotal: $${money(sub)}`,
+    `Delivery: $${money(DELIVERY_FEE)}`,
+    `HST (13%): $${money(tax)}`,
+    `TOTAL: $${money(total)}`
+  ].filter(Boolean).join("\n");
+
+  const instruction =
+    `To complete your order, please send an e‑Transfer of $${money(total)} CAD to ${ETRANSFER_EMAIL}.\n\n` +
+    `Include the following information in the transfer message or notes so we can match your payment to your order:\n\n` +
+    memoLines +
+    "\n\nThank you for ordering from Hoàng Gia Phở! We will confirm your order once payment is received.";
+
+  // Try to copy the instructions to the clipboard for convenience
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(instruction).catch(()=>{});
+  }
+  alert(instruction);
 }
 
 document.getElementById("searchInput").addEventListener("input",(e)=>{
