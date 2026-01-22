@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HOÀNG GIA PHỞ – Delivery Only Menu</title>
+<style>
+:root {
+  --gold:#C9A24D; --black:#0f0f0f; --cream:#F6F1E8; --brown:#3A2C1C; --card:#ffffff;
+  --muted:#6b6b6b; --line:rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--cream);color:#111}
+a{color:inherit}
+header{background:linear-gradient(180deg,#0b0b0b,#151515);padding:18px 16px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(201,162,77,.25)}
+.header-inner{max-width:1440px;margin:0 auto;display:flex;align-items:center;gap:16px}
+.brand{display:flex;gap:14px;align-items:center;min-width:260px}
+.brand img{width:92px;height:auto;object-fit:contain}
+.brand h1{margin:0;color:var(--gold);letter-spacing:.06em;font-size:22px;line-height:1.1}
+.brand p{margin:4px 0 0;color:#eee;font-size:12px}
+.top{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.badge{background:rgba(201,162,77,.12);border:1px solid rgba(201,162,77,.35);color:#f1e6cf;padding:7px 10px;border-radius:999px;font-size:12px}
+.phone{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 10px;font-size:12px;color:#fff}
+.phone strong{color:var(--gold);letter-spacing:.02em}
+.search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 10px;min-width:260px}
+.search input{width:100%;background:transparent;border:none;outline:none;color:#fff;font-size:13px}
+.container{max-width:1440px;margin:0 auto;padding:18px 16px 120px}
+.layout{display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.chip{background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:999px;font-size:13px;color:var(--brown);cursor:pointer;user-select:none}
+.chip.active{background:rgba(201,162,77,.18);border-color:rgba(201,162,77,.55)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.10);border:1px solid rgba(0,0,0,.06)}
+.card img{width:100%;height:190px;object-fit:cover;display:block;background:#eee}
+.card-body{padding:12px}
+.title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.title h3{margin:0;font-size:15px;line-height:1.25}
+.price{font-weight:900;color:var(--brown);white-space:nowrap}
+.meta{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.35}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(201,162,77,.14);border:1px solid rgba(201,162,77,.40);color:var(--brown);padding:5px 8px;border-radius:999px;font-size:11px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+select{flex:1;min-width:160px;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:#fff;font-size:13px}
+.btn{background:var(--black);color:var(--gold);border:none;padding:10px 12px;border-radius:10px;font-weight:900;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--brown);border:1px solid rgba(0,0,0,.12)}
+.btn:active{transform:translateY(1px)}
+
+#cartPanel{position:sticky;top:92px;background:#0f0f0f;color:#fff;border-radius:14px;border:1px solid rgba(201,162,77,.25);box-shadow:0 10px 26px rgba(0,0,0,.25);overflow:hidden}
+/* v4: cart panel scroll + sticky footer checkout (works at zoom/fullscreen) */
+#cartPanel{transition:transform .22s ease, max-height .22s ease}
+.cart-mobile-bar{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  padding:10px 12px;
+  background:rgba(0,0,0,.45);
+  border-bottom:1px solid rgba(201,162,77,.22);
+  cursor:pointer;
+  user-select:none;
+}
+.cart-mobile-bar .grip{
+  width:44px;height:5px;border-radius:999px;
+  background:rgba(255,255,255,.35);
+  margin-right:auto;
+}
+/* Desktop collapse: shrink to bar height */
+#cartPanel.collapsed{max-height:78px}
+#cartPanel.collapsed .cart-inner{display:none}
+
+.cart-inner{padding:14px;display:flex;flex-direction:column;max-height:calc(100vh - 120px)}
+.cart-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cart-scroll{margin-top:10px;overflow:auto;flex:1;padding-right:4px}
+.cart-items{margin-top:0}
+.cart-footer{border-top:1px solid rgba(255,255,255,.12);padding-top:10px;margin-top:10px}
+.cart-footer .btnrow{display:grid;gap:8px}
+.cart-footer .btnrow button{width:100%}
+.cart-head h3{margin:0;color:var(--gold);font-size:16px}
+.cart-items{margin-top:10px;overflow:auto;flex:1;padding-right:4px}
+.cart-item{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);border-radius:12px;padding:10px;margin-bottom:10px}
+.cart-item .name{font-weight:900;font-size:13px}
+.cart-item .sub{color:#ddd;font-size:12px;margin-top:4px;line-height:1.3}
+.cart-item .actions{display:flex;gap:8px;margin-top:8px}
+.smallbtn{background:transparent;border:1px solid rgba(255,255,255,.18);color:#fff;padding:6px 9px;border-radius:9px;cursor:pointer;font-size:12px}
+.smallbtn.danger{border-color:rgba(255,80,80,.35);color:#ffb3b3}
+.summary{border-top:1px solid rgba(255,255,255,.12);padding-top:10px}
+.line{display:flex;justify-content:space-between;font-size:13px;margin:6px 0;color:#f2f2f2}
+.total{font-size:16px;font-weight:900;color:var(--gold);margin-top:8px}
+input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;outline:none;font-size:13px}
+textarea{min-height:62px;resize:vertical}
+fieldset{border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;margin-top:10px}
+legend{padding:0 8px;color:var(--gold);font-size:12px}
+.radio-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.radio-row label{font-size:13px;color:#eee;display:flex;gap:8px;align-items:center;cursor:pointer}
+.hint{font-size:12px;color:#cfcfcf;line-height:1.35}
+.warn{font-size:12px;color:#ffd9a6;background:rgba(201,162,77,.12);border:1px solid rgba(201,162,77,.35);padding:8px;border-radius:10px}
+.primary{background:var(--gold);color:#111;border:none;padding:12px;border-radius:12px;font-weight:900;cursor:pointer}
+.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.18);padding:10px;border-radius:12px;font-weight:900;cursor:pointer}
+.footer{margin:22px 0 0;color:var(--muted);font-size:12px}
+
+#modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:100}
+#modal{width:min(720px, calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:#fff;border-radius:16px;border:1px solid rgba(0,0,0,.10);box-shadow:0 16px 60px rgba(0,0,0,.35)}
+.modal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px;border-bottom:1px solid var(--line)}
+.modal-head h3{margin:0;font-size:16px;color:var(--brown)}
+.modal-body{padding:14px}
+.modal-body .desc{white-space:pre-wrap;line-height:1.45;font-size:13px;color:#111}
+.modal-img{width:100%;height:260px;object-fit:cover;background:#eee;border-bottom:1px solid var(--line)}
+.closeX{background:transparent;border:1px solid rgba(0,0,0,.14);border-radius:10px;padding:8px 10px;cursor:pointer}
+
+
+@media (max-width: 980px){
+  .layout{grid-template-columns:1fr}
+
+  /* Mobile cart drawer (slides) */
+  #cartPanel{
+    position:fixed;
+    left:12px; right:12px;
+    bottom:12px; top:auto;
+    z-index:60;
+    height:70vh;
+    transition:transform .22s ease;
+    will-change:transform;
+  }
+  #cartPanel.collapsed{ transform:translateY(calc(70vh - 78px)); }
+
+  .cart-mobile-bar{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    padding:10px 12px;
+    background:rgba(0,0,0,.88);
+    border-bottom:1px solid rgba(201,162,77,.22);
+    cursor:pointer;
+    user-select:none;
+  }
+  .cart-mobile-bar .grip{
+    width:44px;height:5px;border-radius:999px;
+    background:rgba(255,255,255,.35);
+    margin-right:auto;
+  }
+
+  .cart-inner{max-height:calc(70vh - 54px)}
+  header{position:sticky}
+  .brand{min-width:0}
+  .search{min-width:180px}
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <img src="hoang-gia-pho-logo.png" alt="Hoàng Gia Phở Logo" onerror="this.style.display='none'">
+      <div>
+        <h1>HOÀNG GIA PHỞ</h1>
+        <p>Delivery Only · Royal Vietnamese Home Cooking</p>
+      </div>
+    </div>
+
+    <div class="top">
+      <div class="badge">Preorders supported · Live cart always visible</div>
+      <div class="phone">Call / Text <strong><a href="tel:+1 (289) 698-2958">+1 (289) 698-2958</a></strong></div>
+      <div class="search"><span style="opacity:.85">🔎</span><input id="searchInput" placeholder="Search the menu…"></div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="layout">
+    <main>
+      <div class="nav" id="categoryChips"></div>
+      <div id="menuRoot"></div>
+      <div class="footer">
+        Images and items are loaded from your Excel menu export. Replace <strong>hoang-gia-pho-logo.png</strong> in this folder to show your logo.
+      </div>
+    </main>
+
+    <aside id="cartPanel" aria-label="Checkout cart (always visible)">
+      <div class="cart-mobile-bar" role="button" tabindex="0" aria-label="Toggle cart">
+        <div class="grip" aria-hidden="true"></div>
+        <button class="btn secondary small" id="cartToggleBtn" type="button">Hide</button>
+      </div>
+      <div class="cart-inner">
+        <div class="cart-head">
+          <h3>Checkout</h3>
+          <div class="pill" id="leadPill">Lead time: —</div>
+        </div>
+
+        <div class="cart-scroll">
+          <div class="cart-items" id="cartItems"></div>
+
+          <div class="summary">
+          <div class="line"><span>Subtotal</span><span>$<span id="subTotal">0.00</span></span></div>
+          <div class="line"><span>Delivery fee</span><span>$<span id="deliveryFee">7.99</span></span></div>
+          <div class="line"><span>HST (13%)</span><span>$<span id="hst">0.00</span></span></div>
+          <div class="line total"><span>Total</span><span>$<span id="grandTotal">0.00</span></span></div>
+
+          <div class="warn" id="leadWarn" style="display:none;margin-top:10px"></div>
+
+          <fieldset>
+            <legend>Delivery Time</legend>
+            <div class="radio-row">
+              <label><input type="radio" name="when" value="asap" checked onchange="toggleSchedule()"> ASAP</label>
+              <label><input type="radio" name="when" value="schedule" onchange="toggleSchedule()"> Schedule preorder</label>
+            </div>
+
+            <div id="scheduleFields" style="display:none;margin-top:10px">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <div style="flex:1;min-width:140px">
+                  <div class="hint" style="margin-bottom:6px">Date</div>
+                  <input type="date" id="scheduleDate">
+                </div>
+                <div style="flex:1;min-width:140px">
+                  <div class="hint" style="margin-bottom:6px">Time</div>
+                  <input type="time" id="scheduleTime" step="900">
+                </div>
+              </div>
+              <div class="hint" style="margin-top:8px">Preorders must meet the required lead time based on items in your cart.</div>
+            </div>
+          </fieldset>
+
+          <div style="margin-top:10px;display:grid;gap:8px">
+            <input id="custName" placeholder="Full name">
+            <input id="custPhone" placeholder="Phone">
+            <input id="custEmail" placeholder="Email (optional)">
+            <textarea id="custAddress" placeholder="Delivery address (street, city, postal code)"></textarea>
+            <textarea id="custNotes" placeholder="Notes (buzz code, allergies, substitutions, delivery instructions)"></textarea>
+          </div>
+        </div><!-- /.summary -->
+        </div><!-- /.cart-scroll -->
+
+        <div class="cart-footer">
+          <div class="btnrow">
+            <button class="primary" onclick="checkoutWhatsApp()">Checkout (WhatsApp)</button>
+            <button class="secondary" onclick="checkoutEmail()">Checkout (Email)</button>
+          </div>
+          <div class="hint" style="margin-top:10px">
+            Private delivery ordering. You will receive confirmation after review. Taxes and delivery fee are calculated automatically.
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- More info modal -->
+<div id="modalBackdrop" onclick="closeModal(event)">
+  <div id="modal" role="dialog" aria-modal="true" aria-label="Menu item details" onclick="event.stopPropagation()">
+    <img id="modalImg" class="modal-img" alt="" />
+    <div class="modal-head">
+      <h3 id="modalTitle">Item</h3>
+      <button class="closeX" onclick="closeModal()">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="pills" style="margin-top:0">
+        <span class="pill" id="modalServing" style="display:none"></span>
+        <span class="pill" id="modalPrep" style="display:none"></span>
+      </div>
+      <div class="desc" id="modalDesc" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MENU = [{"id": 1, "name": "Beef Pho", "desc": "Phở Bò – Vietnamese Beef Noodle Soup\nA classic bowl of Vietnamese comfort — Phở Bò is rich, fragrant, and deeply satisfying. Our slow-simmered beef broth is infused with roasted onion, ginger, and spices, served with tender slices of rare and well-done beef, beef meatballs, and silky rice noodles.\nEach bowl captures the soul of Saigon mornings — warm, hearty, and full of love.\nFreshly cooked after your order.\nServed with lime, chili, and our homemade fish sauce for the perfect balance.\n\nIngredients:\nBeef broth (beef bones, brisket, ginger, onion, star anise, cinnamon, clove, fish sauce, salt, sugar), rice noodles, sliced rare beef (thịt tái), well-done beef (thịt chín), beef meatballs (bò viên), green onions, cilantro, and white onions.\n\nToppings (served separately):\nFresh herbs (basil, cilantro), bean sprouts, lime wedges, chili slices, fish sauce, and hoisin sauce.\n\nAllergy Information:\nContains fish (fish sauce), soy (hoisin sauce), and wheat traces (in sauce).\nGluten-free noodles available upon request.\n\nStorage & Serving:\nKeep refrigerated. Reheat broth until hot, pour over noodles and beef, add toppings right before serving.\nHomemade in small batches — rich broth, no MSG, just pure flavour and care.", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row003.png", "options": [{"label": "Standard", "price": 80.0}], "basePrice": 80.0}, {"id": 2, "name": "Chicken Pho", "desc": "A bowl of comfort, warmth, and pure simplicity.\nOur Phở Gà is made from a slow-simmered chicken broth, fragrant with ginger and onions, served with tender shredded chicken, rice noodles, and fresh herbs.\nEach spoonful is light yet full of flavour — the kind of meal that feels like home.\n\nFreshly prepared after your order.\nServed with lime, chili, and homemade fish sauce for that perfect balance", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row004.png", "options": [{"label": "Standard", "price": 80.0}], "basePrice": 80.0}, {"id": 3, "name": "Crispy Rice with Pork Floss & Garlic Fish Sauce Glaze", "desc": "Crispy Rice with Pork Floss & Garlic Fish Sauce Glaze\n\nDescription:\nGolden, crunchy rice crackers glazed with sweet-savory garlic fish sauce, topped with fluffy pork floss (chà bông) for that irresistible umami crunch.\nEvery bite is crispy, fragrant, and packed with layers of flavour — sweet, salty, buttery, and a little bit spicy.\nPerfect as a snack, side dish, or a gift from the kitchen that no one can resist! 😋\n\n✨ Handmade fresh in small batches — the ultimate Vietnamese comfort snack.\n\nIngredients:\nSteamed rice, garlic fish sauce glaze, sugar, pork floss (chà bông), butter, chili flakes, green onion oil, seasoning powder.\n\nAllergy Info:\nContains fish, soy, wheat, and dairy.", "serving": "500gr", "prep": "1 day in advance", "prepMins": 1440, "img": "images/item-row005.jpg", "options": [{"label": "Standard", "price": 40.0}], "basePrice": 40.0}, {"id": 4, "name": "Sweet Mung Bean Dessert with Coconut Cream", "desc": "Sweet Mung Bean Dessert with Coconut Cream (Chè Đậu Xanh Cốt Dừa)\n\nDescription:\nA classic Vietnamese comfort dessert — smooth mung beans simmered until creamy, then topped with rich coconut cream for the perfect balance of sweetness and fragrance.\nServed warm or chilled, this silky dessert melts in your mouth with every spoonful — light, cozy, and heartwarming. 💛\n\n✨ Homemade with love, using fresh coconut milk and golden mung beans — just like mom used to make.\n\nIngredients:\nMung beans, coconut milk, sugar, pandan leaf, salt, tapioca pearls (optional).\n\nAllergy Info:\nContains coconut.", "serving": "10 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row006.jpg", "options": [{"label": "Standard", "price": 50.0}], "basePrice": 50.0}, {"id": 5, "name": "Vietnamese Iced Coffee with Condensed Milk", "desc": "Strong, bold, and sweetly smooth — this iconic Vietnamese iced coffee is brewed drip by drip from dark roasted beans, then blended with rich condensed milk and poured over ice.\nThe result? A perfect balance of intensity and creaminess — a wake-up call that feels like sunshine in a glass.\n\n✨ Brewed fresh, never bitter, and always satisfying — just like mornings back home in Saigon.\n\nIngredients:\nVietnamese dark roast coffee, condensed milk, ice.\n\nAllergy Info:\nContains milk", "serving": "3 servings", "prep": "20 mins", "prepMins": 20, "img": "images/item-row007.jpg", "options": [{"label": "Standard", "price": 18.0}], "basePrice": 18.0}, {"id": 6, "name": "Vietnamese Crispy Spring Rolls", "desc": "Golden and crispy on the outside, juicy and flavorful on the inside — these Vietnamese spring rolls are packed with shrimp, pork, taro, carrots, and glass noodles, all wrapped in delicate rice paper and fried to perfection.\nEvery bite is crunchy, savoury, and slightly sweet — best enjoyed with fresh herbs and homemade sweet chili fish sauce.\n\n✨ Freshly rolled and fried after order — crunchy, fragrant, and full of love from Mom’s kitchen.\n\nIngredients:\nShrimp, minced pork, taro, carrot, onion, glass noodles, black fungus mushroom, egg, rice paper wrapper, fish sauce, salt, pepper, sugar, and garlic.\n\nAllergy Info:\nContains shellfish (shrimp), egg, and fish (fish sauce).\n\nServing Note:\nServe hot and crispy with dipping sauce and lettuce wraps. Pairs perfectly with vermicelli noodles (bún thịt nướng) or fried rice.", "serving": "30 pcs \n\n50 pcs\n\n100 pcs", "prep": "2- 3 hours", "prepMins": 120, "img": "images/item-row008.jpg", "options": [{"label": "30 pcs", "price": 60.0}, {"label": "50 pcs", "price": 100.0}, {"label": "100 pcs", "price": 190.0}], "basePrice": 60.0}, {"id": 7, "name": "Vietnamese Sandwich with Homemade Pâté & Butter", "desc": "Crispy on the outside, soft inside — our Bánh Mì Thịt is a true Vietnamese classic!\nStuffed with layers of homemade pâté and butter, fluffy pork floss, BBQ pork (xá xíu), ham, and pickled carrots & daikon, topped with fresh cucumber and a touch of chili.\nEvery bite is rich, savoury, and perfectly balanced — the kind of sandwich you’ll crave again the moment it’s gone! 😍\n\n✨ Homemade ingredients, fresh bread, and that signature flavour you can only find in a real Vietnamese kitchen.\n\nIngredients:\nVietnamese baguette, homemade pâté, homemade butter, BBQ pork (xá xíu), ham, pork floss (chà bông), pickled carrot & daikon, cucumber, fresh cilantro, chili (optional), soy sauce, and seasoning oil.\n\nAllergy Info:\nContains soy, wheat, egg, and dairy.", "serving": "5 pcs \n\n10 pcs (buy 10 get 1 free)", "prep": "30 mins - 1 hour", "prepMins": 1800, "img": "images/item-row009.jpg", "options": [{"label": "5 pcs", "price": 50.0}, {"label": "11 pcs", "price": 100.0}], "basePrice": 50.0}, {"id": 8, "name": "Vietnamese Chicken Salad", "desc": "Shredded chicken (half chicken) mixed with cabbage, carrots, onions, and herbs in a light, sweet-and-tangy dressing.", "serving": "Small tray - Large Tray", "prep": "1 hour", "prepMins": 60, "img": "images/item-row010.jpg", "options": [{"label": "Standard", "price": 60.0}], "basePrice": 60.0}, {"id": 9, "name": "Yangzhou Fried Rice – Vietnamese-Chinese Style Fried Rice", "desc": "A colorful, flavour-packed fried rice loaded with diced sausage, BBQ pork, ham, and seasonal vegetables — wok-tossed over high heat for that irresistible smoky aroma.\nEach grain of rice is golden, fluffy, and infused with the savoury sweetness of soy and oyster sauce — a comfort dish loved by everyone from kids to grandparents.\n\n✨ Homemade and freshly stir-fried after your order — no greasy taste, just clean, fragrant, and full of love.\n\nIngredients:\nJasmine rice, Chinese sausage (lạp xưởng), BBQ pork (xá xíu), ham (jambon), carrot, green peas, broccoli, onion, garlic, egg, soy sauce, oyster sauce, sesame oil, and a touch of pepper.\n\nAllergy Info:\nContains soy, egg, and wheat (in sauces)", "serving": "Small tray - Large Tray", "prep": "1 hour", "prepMins": 60, "img": "images/item-row011.jpg", "options": [{"label": "Standard", "price": 50.0}], "basePrice": 50.0}, {"id": 10, "name": "Authentic Hue Beef Noodle Soup (Bún Bò Huế)", "desc": "Authentic Hue Beef Noodle Soup (Bún Bò Huế) - All-in-One Kit! 🍜\nExperience the Soul of Central Vietnam Right at Home!\nReady to taste one of Vietnam's most complex and deeply flavorful dishes? Our Bún Bò Huế (Hue Beef Noodle Soup) Kit brings the authentic, spicy, savory, and aromatic experience of Hue cuisine straight to your kitchen. Forget bland imitations—this is the real deal!\n\nWhy You'll Be Hooked:\nUnforgettable Flavor: Our homemade broth base is simmered for hours, perfectly balancing the classic notes of lemongrass, chili, and fermented shrimp paste. It's intensely savory, beautifully spicy, and incredibly aromatic. Warning: You will crave this immediately after your first bite!\n\n🇻🇳 Truly Authentic: We follow traditional recipes to ensure every bowl is as genuine as the street food you'd find in Hue. This is a culinary journey you won't want to miss.\n\nConvenience for 4: Everything you need to serve four generous portions is included and perfectly portioned, making dinner quick and hassle-free.\n\nWhat's Inside Your Kit (Serves 4):\nBún (Thick Rice Noodles): Generous portion of thick, round rice noodles (the traditional noodle for Bún Bò Huế).\n\nRich Broth Base: Our secret, slow-simmered, concentrated broth for maximum flavor.\n\n🍖 Premium Meats: Sliced Beef and Pork (usually includes both lean cuts and richer pork hock/trotters) – ready to be quickly added.\n\nFresh Herb & Veggie Pack: A vibrant mix of accompanying fresh greens, including shredded banana blossom, mint, bean sprouts, and lime wedges (or similar traditional accompaniments).\n\nChili Oil: A separate pot of our special Sate Chili Oil for those who love an extra kick!", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row012.jpg", "options": [{"label": "Standard", "price": 100.0}], "basePrice": 100.0}, {"id": 11, "name": "Mini Bánh Khọt – Vietnamese Shrimp & Pork Crispy Cups", "desc": "What You Get\n\nDelicious mini bánh khọt — crispy Vietnamese savoury cups topped with shrimp and pork.\nLight, crunchy, flavourful — perfect for sharing!\n\n💰 $25 CAD per tray (50 pieces)\n\n🎁 Comes With Free Extras:\n\n✔️ Vietnamese sweet & tangy fish sauce (nước mắm chua ngọt)\n✔️ Pickled veggies (đồ chua) for the full authentic experience", "serving": "Tray of 50pcs mini banh khot", "prep": "2 hours", "prepMins": 120, "img": "images/item-row013.png", "options": [{"label": "Standard", "price": 50.0}], "basePrice": 50.0}, {"id": 12, "name": "Silky Tofu Dessert", "desc": "🍮 Silky Tofu Dessert (Tàu Hủ) – 800g Family Box\n\n✔️ Soft, fresh tofu made from real soybeans\n✔️ Served with ginger syrup + coconut milk\n✔️ Each box feeds 4–5 people\n\n💰 $20 CAD per 800g box\n🎁 Buy 10 boxes, get 1 free", "serving": "800GR", "prep": "1 day in advance", "prepMins": 1440, "img": "images/item-row014.jpg", "options": [{"label": "Standard", "price": 40.0}], "basePrice": 40.0}, {"id": 13, "name": "HOMEMADE SWEET RICE DUMPLINGS (CHÈ TRÔI NƯỚC)", "desc": "🍡 HOMEMADE SWEET RICE DUMPLINGS WITH MUNG BEAN FILLING (CHÈ TRÔI NƯỚC) 🍡\n$20 CAD / BOX – 10 DUMPLINGS + MINI GLUTINOUS BALLS (VIÊN Ỉ), COCONUT MILK & ROASTED SESAME\n\nFreshly made, soft, chewy, and extremely fragrant!\nEach box includes:\n✔️ 10 large sweet rice dumplings with mung bean filling inside\n✔️ Extra small plain glutinous rice balls (viên ỉ – no filling)\n✔️ Rich, creamy coconut milk\n✔️ Fragrant roasted sesame topping\n\nPerfect for dessert, family gatherings, or special occasions.", "serving": "10 pcs", "prep": "2- 3 hours", "prepMins": 120, "img": "images/item-row015.jpg", "options": [{"label": "Standard", "price": 40.0}], "basePrice": 40.0}, {"id": 14, "name": "Grilled Banana Sticky Rice with Coconut Sauce (Bánh Chuối Nếp Nướng)", "desc": "Grilled Banana Sticky Rice with Coconut Sauce (Bánh Chuối Nếp Nướng)\nHomemade Vietnamese dessert 🇻🇳\n\nFreshly made grilled banana wrapped in sticky rice, served with rich coconut sauce and crunchy crushed peanuts on top.\nSoft inside, lightly crispy outside, fragrant and naturally sweet — no artificial flavors.\n\n🥥 Coconut sauce homemade\n🥜 Crushed peanuts served on top (can be reduced or removed if needed)\n🍌 Made fresh, small batch, family-style\n\nPerfect for dessert or afternoon snack.", "serving": "10 pcs", "prep": "3 hours", "prepMins": 180, "img": "images/item-row016.jpg", "options": [{"label": "Standard", "price": 60.0}], "basePrice": 60.0}, {"id": 15, "name": "Steamed Banana Cake with Coconut Sauce", "desc": "A classic Vietnamese dessert made from ripe bananas, gently steamed until soft and glossy, then finished with creamy coconut sauce and a sprinkle of sesame seeds or crushed peanuts.\n\nNaturally sweet, smooth, and comforting, with a light chewy texture.\nBest enjoyed slightly warm or chilled — simple, nostalgic, and homemade.", "serving": "Large tray", "prep": "3 hours", "prepMins": 180, "img": "images/item-row017.png", "options": [{"label": "Standard", "price": 60.0}], "basePrice": 60.0}, {"id": 16, "name": "Bánh Cuốn – Vietnamese Steamed Rice Rolls", "desc": "Bánh Cuốn – Vietnamese Steamed Rice Rolls\n\nDelicate steamed rice sheets, thin and silky, rolled with a savory filling of seasoned ground pork and wood ear mushrooms. Topped with crispy fried shallots, fresh herbs, and bean sprouts for balance and aroma.\n\nServed with light Vietnamese fish sauce (nước chấm) on the side — slightly sweet, tangy, and fragrant with chili.\n\nSoft, comforting, and elegant.\nA classic Vietnamese breakfast or light meal that’s gentle yet deeply flavorful.", "serving": "Large tray (4lbs)", "prep": "3 hours", "prepMins": 180, "img": "images/item-row018.jpg", "options": [{"label": "Standard", "price": 50.0}], "basePrice": 50.0}, {"id": 17, "name": "Savory Sticky Rice (Xôi Mặn)", "desc": "🍚 Savory Sticky Rice (Xôi Mặn)\nFragrant sticky rice topped with pork floss, Chinese sausage (lap xuong), pâté, scallion oil, and quail egg.\nRich, satisfying, and perfect for breakfast or a quick meal.", "serving": "Large tray", "prep": "3 hours", "prepMins": 180, "img": "images/item-row019.jpg", "options": [{"label": "Standard", "price": 100.0}], "basePrice": 100.0}, {"id": 18, "name": "Braised Chicken Sticky Rice", "desc": "🍗 Xôi Gà Khìa (Braised Chicken Sticky Rice)\nFragrant sticky rice served with tender, slow-braised chicken in a savory-sweet sauce, rich with aromatics and deep color.\nComforting, filling, and perfect for breakfast or a hearty meal.", "serving": "Large tray (serve up to 6 ppl)", "prep": "3 hours", "prepMins": 180, "img": "images/item-row020.jpg", "options": [{"label": "Standard", "price": 100.0}], "basePrice": 100.0}, {"id": 19, "name": "Xôi Khúc (Vietnamese Mugwort Sticky Rice)", "desc": "Xôi Khúc (Vietnamese Mugwort Sticky Rice)\nSticky rice layered with mugwort-infused dough and a savory mung bean & pork filling, soft, fragrant, and comforting.\nA classic Northern Vietnamese dish, hearty and satisfying.", "serving": "Large tray - 10 pcs", "prep": "4 hours", "prepMins": 240, "img": "images/item-row021.jpg", "options": [{"label": "Standard", "price": 100.0}], "basePrice": 100.0}, {"id": 20, "name": "Char Siu Egg Noodles with Shrimp & Soft-Boiled Egg", "desc": "🍜 Char Siu Egg Noodles with Shrimp & Soft-Boiled Egg\n\nMin order: 3 pax \n\n📦 Ready-to-go | Freshly made\n\nSavory dry-tossed egg noodles with a rich, well-balanced sauce. Springy noodles, not greasy, satisfying but light.\n\nEach box comes with:\n✅ Sliced char siu pork, juicy and lightly caramelized\n✅ Fresh shrimp, naturally sweet\n✅ Soft-boiled egg with a creamy yolk\n✅ Scallions, cilantro & crispy fried shallots\n✅ Fresh lettuce on the side for balance\n\nPerfect for:\n\nLunch at work\n\nQuick dinner\n\nTakeaway meals\n\n📌 Not spicy (chili optional)\n📌 Clean, secure packaging\n📌 Best enjoyed fresh or lightly reheated", "serving": "3 servings", "prep": "1 hour", "prepMins": 60, "img": "images/item-row022.jpg", "options": [{"label": "Standard", "price": 72.0}], "basePrice": 72.0}, {"id": 21, "name": "Bún thịt xào chả giò - Stir-Fried Pork Vermicelli with Lemongrass & Crispy Spring Rolls ✨", "desc": "Juicy pork stir-fried with fragrant lemongrass and onions, perfectly glazed and full of flavor.\nServed over soft rice vermicelli, topped with roasted peanuts for a nutty crunch, and paired with fresh greens.\nFinished with crispy golden spring rolls — crunchy on the outside, savory on the inside.\nComforting, well-balanced, and deeply satisfying — a true taste of home in every bite. 🍜🤍", "serving": "3 servings", "prep": "1 hour", "prepMins": 60, "img": "images/item-row023.jpg", "options": [{"label": "Standard", "price": 72.0}], "basePrice": 72.0}, {"id": 22, "name": "Xôi Vò (Vietnamese Mung Bean Sticky Rice)", "desc": "Fragrant sticky rice gently mixed with finely mashed mung beans, creating a soft, fluffy, and lightly crumbly texture. Mildly sweet, comforting, and traditionally enjoyed on its own or with savory dishes. Homemade with simple ingredients, no artificial flavors.", "serving": "Large tray", "prep": "3 hours", "prepMins": 180, "img": "images/item-row024.jpg", "options": [{"label": "Standard", "price": 100.0}], "basePrice": 100.0}, {"id": 23, "name": "Hainanese Chicken Rice – Family Set", "desc": "Free-range chicken served with fragrant rice, 4 homemade dipping sauces, and complimentary soup & char siu. Tender, juicy chicken with clean, natural flavor, prepared fresh and carefully.", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row025.jpg", "options": [{"label": "Standard", "price": 110.0}], "basePrice": 110.0}, {"id": 24, "name": "Charsiu BBQ Pork Rice (Cơm Xá Xíu)", "desc": "Homemade Vietnamese-style BBQ pork served with fragrant yellow rice, lightly pickled vegetables, and fresh greens.\nThe pork is marinated, roasted until tender and caramelized, then sliced and glazed with a savory-sweet sauce.\n\n✔ Juicy, flavorful xá xíu pork\n✔ Fragrant turmeric rice\n✔ Fresh pickles for balance\n✔ Comforting, well-balanced meal\n\nPerfect for lunch or dinner.\nFreshly prepared, home-cooked with care.", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row026.jpg", "options": [{"label": "Standard", "price": 90.0}], "basePrice": 90.0}, {"id": 25, "name": "Vietnamese Fermented Pork (Nem Chua – Lai Vung Style)", "desc": "Vietnamese Fermented Pork (Nem Chua – Lai Vung Style) 🌿🌶️\n\nTraditional Vietnamese nem chua, made in the Lai Vung style.\nSoft, slightly tangy fermented pork with garlic, chili, and herbs, wrapped and portioned into bite-size pieces.\n\n✔ Authentic Vietnamese flavor\n✔ Lightly sour, savory, and aromatic\n✔ Perfect as a snack, appetizer, or party finger food\n✔ Great for sharing or charcuterie-style trays\n\nBest enjoyed chilled or at room temperature.\nHomemade in small batches with care.", "serving": "650 gr", "prep": "1 day in advance", "prepMins": 1440, "img": "images/item-row027.jpg", "options": [{"label": "Standard", "price": 30.0}], "basePrice": 30.0}, {"id": 26, "name": "ietnamese Beef Stew (Bò Kho) – Choice of Banh Mi, Hu Tieu, or Noodles", "desc": "Vietnamese Beef Stew (Bò Kho) – Choice of Banh Mi, Hu Tieu, or Noodles 🍲🥖🍜\n\nSlow-braised Vietnamese bò kho made with tender beef, carrots, and aromatic spices in a rich, comforting broth.\nWarm, flavorful, and perfect for any meal.\n\n✨ Serving options (please let us know your choice):\n• With Banh Mi (Vietnamese baguette)\n• With Hu Tieu\n• With Egg noodles\n• Or mix (by request)\n\n✔ Beef is slow-cooked until tender\n✔ Rich, fragrant broth\n✔ Homemade, small-batch cooking\n✔ Comfort food you’ll crave again", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row028.jpg", "options": [{"label": "Standard", "price": 90.0}], "basePrice": 90.0}, {"id": 27, "name": "Braised Pork Rib Noodle Soup (Hủ Tiếu Sườn Kho) 🍜", "desc": "Braised Pork Rib Noodle Soup (Hủ Tiếu Sườn Kho) 🍜\n\nHomemade Vietnamese hủ tiếu sườn kho with tender braised pork ribs, chewy rice noodles, and a rich, savory broth simmered slowly with traditional spices.\n\n✔ Pork ribs braised until soft and flavorful\n✔ Light yet comforting broth\n✔ Served with fresh herbs, lime, and chili\n✔ Perfect for lunch or dinner\n\nWarm, satisfying, and full of home-style flavor.\nFreshly prepared in small batches.", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row029.jpg", "options": [{"label": "Standard", "price": 90.0}], "basePrice": 90.0}, {"id": 28, "name": "Mango Sticky Rice (Xôi Xoài) 🥭", "desc": "Freshly made Vietnamese-style mango sticky rice with fragrant pandan sticky rice, ripe sweet mango, and creamy coconut sauce on the side.\nSoft, lightly sweet, and perfectly balanced.\n\n✔ Fragrant green sticky rice\n✔ Ripe, juicy mango\n✔ Rich coconut sauce\n✔ Light dessert or sweet snack\n\nPerfect as a dessert, afternoon treat, or party box.\nHomemade in small batches with care.", "serving": "3 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row030.jpg", "options": [{"label": "Standard", "price": 70.0}], "basePrice": 70.0}, {"id": 29, "name": "Homemade Vietnamese Pâté – Butter or Chili Oil (or Mix)", "desc": "Homemade Vietnamese Pâté – Butter or Chili Oil (or Mix) 🥖🔥🧈\nRich and smooth homemade Vietnamese pâté, slow-cooked and blended until creamy and savory.\nServed with your choice of topping for extra indulgence.\n✨ Topping options (please choose):\n• Butter topping – extra rich and creamy\n• Homemade chili oil (sa tế) – spicy, fragrant, and addictive\n• Mix – best of both worlds\n✔ Smooth, flavorful pâté\n✔ Made fresh in small batches\n✔ Perfect for bánh mì, toast, or as a savory snack\nComfort food done the homemade way.", "serving": "500gr", "prep": "1 day in advance", "prepMins": 1440, "img": "images/item-row031.jpg", "options": [{"label": "Standard", "price": 30.0}], "basePrice": 30.0}, {"id": 30, "name": "Vietnamese Sticky Rice Cake (Bánh Tét)", "desc": "Traditional homemade bánh tét, made with glutinous rice wrapped in banana leaves and slowly cooked for a soft, fragrant texture.\nRich, comforting, and full of classic Vietnamese flavor.\n\n✨ Filling options may include:\n• Savory pork & mung bean\n• Soft, sticky rice with balanced seasoning\n\nPerfect for family meals, sharing, or enjoying sliced and pan-fried the next day.\n\n✔ Handmade in small batches\n✔ No shortcuts, slow-cooked the traditional way\n✔ Comfort food that tastes like home", "serving": "pair of cakes. 1kg each pcs", "prep": "1 day in advance", "prepMins": 1440, "img": "images/item-row032.jpg", "options": [{"label": "Standard", "price": 60.0}], "basePrice": 60.0}, {"id": 31, "name": "Vietnamese Tapioca Dumplings (Bánh Bột Lọc)", "desc": "Homemade bánh bột lọc with chewy, translucent tapioca dough filled with savory shrimp and pork, wrapped or served Huế-style.\nSoft, slightly chewy, and perfectly balanced with sweet-savory flavors.\n\n✨ Served with traditional fish sauce, garlic, and chili on the side.\n\n✔ Chewy tapioca texture\n✔ Savory shrimp & pork filling\n✔ Made fresh in small batches\n✔ Great as a snack or light meal\n\nComforting Vietnamese street food, made the homemade way.", "serving": "25 pcs", "prep": "3 hours", "prepMins": 180, "img": "images/item-row033.png", "options": [{"label": "Standard", "price": 50.0}], "basePrice": 50.0}, {"id": 32, "name": "Pickled Mustard Greens", "desc": "Vietnamese Pickled Mustard Greens (Dưa Chua Việt Nam) – Homemade\nFresh, crunchy, naturally fermented\n\nTraditional Vietnamese pickled mustard greens, home-fermented in small batches. Lightly sour, fragrant, and perfectly balanced — not overly sharp or artificial.\n\n✨ How to enjoy:\n• Eat with braised pork & eggs (thịt kho trứng)\n• Cook sour soup (canh dưa)\n• Stir-fry with beef for Vietnamese pickled mustard beef fried rice (cơm chiên dưa bò)\n• Stir-fry with pork or eggs\n• Great side dish to cut richness and refresh the palate\n\n🥬 Naturally fermented\n🥬 No preservatives\n🥬 Home-style taste, not commercial", "serving": "800gr", "prep": "1 day in advance", "prepMins": 1440, "img": "images/item-row034.jpg", "options": [{"label": "Standard", "price": 20.0}], "basePrice": 20.0}, {"id": 33, "name": "Kim Chi", "desc": "Traditional homemade kimchi, freshly made in small batches. Crunchy napa cabbage, well-balanced spicy–sour flavor, not overly salty, and naturally fermented.\n\n🥬 Size: 800g box\n💲 Price: $12 CAD\n\n✨ How to enjoy:\n• As a side dish with rice\n• Stir-fry with pork or beef\n• Cook kimchi soup\n• Eat with fried rice or noodles\n\n🌶 Fresh ingredients\n🌶 Naturally fermented\n🌶 Home-style taste, not store-bought", "serving": "800g", "prep": "1 day in advance", "prepMins": 1440, "img": "images/item-row035.jpg", "options": [{"label": "Standard", "price": 24.0}], "basePrice": 24.0}, {"id": 34, "name": "Vietnamese Braised Basa Fish with Black Pepper (Cá Basa Kho Tiêu)", "desc": "🇻🇳 Vietnamese Braised Basa Fish with Black Pepper (Cá Basa Kho Tiêu) – Homemade\n\nSlow-braised basa fish in a rich, savory caramelized sauce, infused with black pepper, chili, and fish sauce. Deep flavor, slightly spicy, very comforting — perfect with hot rice.\n\n🍽 Portion: 2 large fish steaks\n💲 Price: $15 CAD\n\n✨ How to enjoy:\n• Best with steamed rice\n• Eat together with braised pork & eggs (thịt kho trứng)\n• Great for a simple Vietnamese home-style meal\n\n🐟 Fresh basa fish\n🐟 Home-cooked, no shortcuts\n🐟 Not overly salty, not commercial-style", "serving": "1 pack", "prep": "3 hours", "prepMins": 180, "img": "images/item-row036.jpg", "options": [{"label": "Standard", "price": 30.0}], "basePrice": 30.0}, {"id": 35, "name": "Vietnamese Pork Skin Rolls (Bì Cuốn) – Homemade", "desc": "Vietnamese Pork Skin Rolls (Bì Cuốn) – Homemade\n\nFresh Vietnamese pork skin rolls made in small batches. Light, refreshing, and full of texture — chewy pork skin, herbs, and rice paper, perfect as a snack or light meal.\n\n🌿 Served with dipping sauce\n🌿 Freshly rolled, not pre-packed\n🌿 Balanced, not greasy\n\n🍽 Price: $2 / roll\n📦 Minimum order: 10 rolls\n\n✨ How to enjoy:\n• Eat as a light snack or appetizer\n• Great alongside spring rolls or fried dishes\n• Perfect for parties and sharing", "serving": "10 pcs", "prep": "2 hours", "prepMins": 120, "img": "images/item-row037.jpg", "options": [{"label": "Standard", "price": 40.0}], "basePrice": 40.0}, {"id": 36, "name": "Vietnamese Fresh Spring Rolls (Gỏi Cuốn) – Homemade", "desc": "Vietnamese Fresh Spring Rolls (Gỏi Cuốn) – Homemade\n\nFresh Vietnamese spring rolls made daily in small batches. Light, clean, and refreshing — filled with shrimp, pork, rice noodles, and fresh herbs, wrapped in soft rice paper.\n\n🥬 Fresh ingredients\n🥬 Rolled fresh, not pre-made\n🥬 Light, healthy, not greasy\n\n🍽 Price: $2 / roll\n📦 Minimum order: 10 rolls\n🥣 Served with dipping sauce\n\n✨ How to enjoy:\n• Perfect as a light meal or snack\n• Great for parties and sharing\n• Pairs well with fried spring rolls or rice dishes", "serving": "10 pcs", "prep": "2 hours", "prepMins": 120, "img": "images/item-row038.jpg", "options": [{"label": "Standard", "price": 40.0}], "basePrice": 40.0}, {"id": 37, "name": "Cơm Rang Dưa Bò - 4 servings - (Vietnamese Beef & Pickled Mustard Greens Fried Rice)", "desc": "Experience the authentic taste of Hanoi street food right here in Hamilton! Our signature Cơm Rang Dưa Bò (Vietnamese Beef & Pickled Mustard Greens Fried Rice) features golden, wok-fried rice paired with tender, savory beef and perfectly tangy, crunchy home-cured pickled greens. It’s the ultimate comfort meal that hits every flavor note: savory, sour, and satisfying. Freshly prepared and ready for local pickup in Hamilton. Order your authentic taste of Vietnam today!", "serving": "4 servings", "prep": "2 hours", "prepMins": 120, "img": "images/item-row039.jpg", "options": [{"label": "Standard", "price": 100.0}], "basePrice": 100.0}, {"id": 38, "name": "Bún riêu - Crab noodle soup", "desc": "Authentic Vietnamese Bún Riêu - A Taste of Home in Hamilton!\n\nCraving a bowl of soulful, savory crab noodle soup? Our homemade Bún Riêu features a rich tomato-based broth, real crab paste, tender pork ribs, and golden fried tofu, served with fresh herbs. Experience the true flavors of Vietnam right here in the GTHA. Perfect for a cozy lunch or dinner!", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row040.jpg", "options": [{"label": "Standard", "price": 100.0}], "basePrice": 100.0}, {"id": 39, "name": "Bánh Canh Cua Giò Heo (4 servings)- Vietnamese Crab & Pork Hock Thick Noodle Soup", "desc": "Authentic Bánh Canh Cua Giò Heo - Homemade in Hamilton!\n\nCraving the rich, savory taste of Vietnamese Crab & Pork Hock Thick Noodle Soup? Our homemade Bánh Canh Cua is crafted with a luscious, slow-simmered broth, fresh crab meat, and tender, melt-in-your-mouth pork hocks. Perfect for a cozy meal that brings the heart of Saigon to your table.\n✨ Freshly prepared with premium ingredients. Limited portions daily!", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row041.jpg", "options": [{"label": "Standard", "price": 110.0}], "basePrice": 110.0}, {"id": 40, "name": "Bún Cá Chiên Giòn - 4 servings - (Crispy Fried Fish Rice Noodle Soup)", "desc": "Craving an authentic taste of Hanoi right here in Hamilton? Our Bún Cá Chiên Giòn (Crispy Fried Fish Rice Noodle Soup) features perfectly golden, crunchy fish fillets served in a savory, aromatic broth with silky rice noodles and fresh dill. It is the ultimate comfort food that brings the vibrant flavors of Vietnam to your table. Prepared fresh daily with high-quality ingredients.", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row042.jpg", "options": [{"label": "Standard", "price": 90.0}], "basePrice": 90.0}, {"id": 41, "name": "Bún nước tôm bò - 4 servings - Vietnamese Shrimp & Beef Noodle Soup", "desc": "Authentic Vietnamese Shrimp & Beef Noodle Soup (Bún Nước Tôm Bò) - Hamilton & GTHA Area.\n\nExperience the ultimate comfort food! Our Bún Nước Tôm Bò features hand-smashed fresh shrimp paste, tender beef slices, and a signature clear, savory broth, topped with a generous amount of fresh scallions. It's a taste of Saigon right here in Ontario.", "serving": "4 servings", "prep": "3 hours", "prepMins": 180, "img": "images/item-row043.jpg", "options": [{"label": "Standard", "price": 90.0}], "basePrice": 90.0}, {"id": 42, "name": "Lẩu cá đuối - 4-5 servings - VIETNAMESE STINGRAY HOTPOT", "desc": "AUTHENTIC VIETNAMESE STINGRAY HOTPOT IN HAMILTON! 🍲\nExperience the legendary taste of Vung Tau's famous Lẩu Cá Đuối right here in the GTHA. Our hotpot features fresh, tender stingray with a perfect crunch, simmered in a signature sour and spicy broth with bamboo shoots and aromatic herbs. Each set comes ready to heat and serve with vermicelli noodles and fresh vegetables. Perfect for family dinners or a cozy night in!", "serving": "1 pack", "prep": "4 hours", "prepMins": 240, "img": "images/item-row044.jpg", "options": [{"label": "Standard", "price": 120.0}], "basePrice": 120.0}, {"id": 43, "name": "Cá chim nướng muối ớt (2 con 400gr) - Grilled Pomfret with Chili Salt", "desc": "Savor the authentic taste of Vietnam right here in Hamilton! Our Grilled Pomfret with Chili Salt is wrapped in foil to lock in its natural sweetness and moisture, seasoned with a perfect blend of spicy chili and sea salt. It's a healthy, flavorful choice for your next family meal.", "serving": "2 Grilled Whole Fish (400g each) served with fresh herbs, rice vermicelli, and rice paper.", "prep": "3 hours", "prepMins": 180, "img": "images/item-row045.png", "options": [{"label": "Standard", "price": 90.0}], "basePrice": 90.0}];
+
+const DELIVERY_FEE = 7.99;
+const HST_RATE = 0.13;
+const PHONE_DISPLAY = "+1 (289) 698-2958";
+const WHATSAPP_NUMBER = "12896982958";
+
+const state = {
+  cart: [],
+  search: "",
+  activeCat: "All"
+};
+
+function money(n){ return (Math.round(n*100)/100).toFixed(2); }
+function escapeHtml(str){
+  return String(str||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function inferCategory(itemName){
+  const n = (itemName||"").toLowerCase();
+  if(n.includes("pho") || n.includes("bún") || n.includes("bun ") || n.includes("hủ tiếu") || n.includes("hu tieu") || n.includes("bánh canh") || n.includes("bo kho")) return "Noodle Soups";
+  if(n.includes("xôi") || n.includes("xoi") || n.includes("rice") || n.includes("cơm") || n.includes("com ") || n.includes("fried rice") || n.includes("hainanese")) return "Rice & Sticky Rice";
+  if(n.includes("bánh mì") || n.includes("banh mi") || n.includes("roll")) return "Bánh Mì & Rolls";
+  if(n.includes("chè") || n.includes("che ") || n.includes("dessert") || n.includes("tofu") || n.includes("banana") || n.includes("tapioca") || n.includes("mango")) return "Desserts";
+  if(n.includes("hotpot") || n.includes("lẩu") || n.includes("lau ")) return "Hotpot";
+  if(n.includes("kimchi") || n.includes("kim chi") || n.includes("pâté") || n.includes("pate") || n.includes("pickled") || n.includes("nem chua")) return "Sides & Extras";
+  if(n.includes("spring roll") || n.includes("chả giò") || n.includes("cha gio") || n.includes("bánh khọt") || n.includes("banh khot")) return "Appetizers";
+  return "Mains & Trays";
+}
+
+function normalizeMenu(){
+  return MENU.map(it => ({...it, category: inferCategory(it.name)}));
+}
+
+const MENU2 = normalizeMenu();
+
+const CATEGORY_ORDER = ["All","Noodle Soups","Rice & Sticky Rice","Vermicelli & Egg Noodles","Bánh Mì & Rolls","Appetizers","Mains & Trays","Desserts","Hotpot","Sides & Extras"];
+
+function uniqueCategories(){
+  const set = new Set(MENU2.map(i=>i.category));
+  const ordered = CATEGORY_ORDER.filter(c => c==="All" || set.has(c));
+  const extra = [...set].filter(c => !ordered.includes(c)).sort();
+  return [...ordered, ...extra];
+}
+
+function renderChips(){
+  const root = document.getElementById("categoryChips");
+  const cats = uniqueCategories();
+  root.innerHTML = cats.map(c => {
+    const safe = c.replace(/'/g,"\'");
+    return `<div class="chip ${state.activeCat===c?'active':''}" onclick="setCat('${safe}')">${c}</div>`;
+  }).join("");
+}
+
+function setCat(cat){ state.activeCat = cat; renderMenu(); renderChips(); }
+
+function matchesSearch(item){
+  if(!state.search) return true;
+  const q = state.search.toLowerCase();
+  const hay = (item.name+" "+item.desc+" "+item.serving+" "+item.prep+" "+item.category).toLowerCase();
+  return hay.includes(q);
+}
+
+function filteredMenu(){
+  return MENU2
+    .filter(it => (state.activeCat==="All" || it.category===state.activeCat) && matchesSearch(it))
+    .sort((a,b)=>a.id-b.id);
+}
+
+function prepLabel(mins){
+  if(!mins) return "";
+  if(mins>=1440) return "Advance notice (≥ 1 day)";
+  if(mins<60) return "Prep ~ "+mins+" mins";
+  return "Prep ~ "+Math.ceil(mins/60)+" hours";
+}
+
+function openModal(id){
+  const it = MENU2.find(x=>x.id===id);
+  if(!it) return;
+  document.getElementById("modalBackdrop").style.display="flex";
+  const img = document.getElementById("modalImg");
+  img.src = it.img;
+  img.alt = it.name;
+
+  document.getElementById("modalTitle").innerText = it.name;
+
+  const serving = document.getElementById("modalServing");
+  if(it.serving){ serving.style.display="inline-flex"; serving.innerText="🍽 "+it.serving; }
+  else { serving.style.display="none"; }
+
+  const prep = document.getElementById("modalPrep");
+  const pl = prepLabel(it.prepMins);
+  if(pl){ prep.style.display="inline-flex"; prep.innerText="⏱ "+pl; }
+  else { prep.style.display="none"; }
+
+  document.getElementById("modalDesc").innerText = it.desc || "—";
+}
+
+function closeModal(e){
+  if(e && e.target && e.target.id!=="modalBackdrop") return;
+  document.getElementById("modalBackdrop").style.display="none";
+}
+
+function renderMenu(){
+  const root = document.getElementById("menuRoot");
+  const data = filteredMenu();
+
+  // group by category
+  const grouped = {};
+  data.forEach(it => (grouped[it.category] = grouped[it.category] || []).push(it));
+
+  const cats = (state.activeCat==="All")
+    ? uniqueCategories().filter(c=>c!=="All" && grouped[c] && grouped[c].length)
+    : [state.activeCat];
+
+  root.innerHTML = cats.map(cat => {
+    const cards = (grouped[cat]||[]).map(it => {
+      const optId = "opt-"+it.id;
+      const prep = prepLabel(it.prepMins);
+      const prepPill = prep ? `<span class="pill">⏱ ${prep}</span>` : "";
+      const servingPill = it.serving ? `<span class="pill">🍽 ${escapeHtml(it.serving)}</span>` : "";
+      const optionsHtml = (it.options||[]).map(o =>
+        `<option value="${o.price}" data-label="${escapeHtml(o.label)}">${escapeHtml(o.label)} — $${money(o.price)}</option>`
+      ).join("");
+
+      const shownPrice = (it.options && it.options.length>1) ? ("From $"+money(Math.min(...it.options.map(x=>x.price)))) : ("$"+money((it.options && it.options[0] ? it.options[0].price : it.basePrice)||0));
+
+      return `<div class="card" id="item-${it.id}">
+        <img src="${it.img}" alt="${escapeHtml(it.name)}" loading="lazy" />
+        <div class="card-body">
+          <div class="title">
+            <h3>${escapeHtml(it.name)}</h3>
+            <div class="price">${shownPrice}</div>
+          </div>
+
+          <div class="pills">
+            ${servingPill}
+            ${prepPill}
+          </div>
+
+          <div class="row">
+            <select id="${optId}" aria-label="Choose size / option for ${escapeHtml(it.name)}">
+              ${optionsHtml}
+            </select>
+          </div>
+
+          <div class="row">
+            <button class="btn" onclick="addToCart(${it.id})">Add</button>
+            <button class="btn secondary" onclick="openModal(${it.id})">More info</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+
+    return `<div style="margin:18px 0 10px;display:flex;align-items:end;gap:10px">
+      <h2 style="margin:0;color:var(--brown);font-size:18px">${cat}</h2>
+      <div style="color:var(--muted);font-size:12px">Delivery-only menu</div>
+    </div>
+    <div class="grid">${cards}</div>`;
+  }).join("");
+}
+
+function findItem(id){ return MENU2.find(i=>i.id===id); }
+
+function addToCart(id){
+  const it = findItem(id); if(!it) return;
+  const sel = document.getElementById("opt-"+id);
+  const price = parseFloat(sel.value||"0");
+  const label = sel.options[sel.selectedIndex].dataset.label || "Standard";
+  const key = it.id+"||"+label+"||"+price;
+  const ex = state.cart.find(x=>x.key===key);
+  if(ex) ex.qty += 1;
+  else state.cart.push({ key, id:it.id, name:it.name, optionLabel:label, price, qty:1, prepMins:it.prepMins||0 });
+  renderCart();
+}
+
+function inc(key){ const x=state.cart.find(i=>i.key===key); if(!x) return; x.qty+=1; renderCart(); }
+function dec(key){
+  const x=state.cart.find(i=>i.key===key); if(!x) return;
+  x.qty -= 1; if(x.qty<=0) state.cart = state.cart.filter(i=>i.key!==key);
+  renderCart();
+}
+function removeItem(key){ state.cart = state.cart.filter(i=>i.key!==key); renderCart(); }
+
+function cartSubtotal(){ return state.cart.reduce((s,i)=>s+i.price*i.qty,0); }
+function cartLeadMins(){ let m=0; state.cart.forEach(i=>{ if((i.prepMins||0)>m) m=i.prepMins||0; }); return m; }
+
+function renderCart(){
+  const root = document.getElementById("cartItems");
+  if(state.cart.length===0){
+    root.innerHTML = `<div class="hint">Your cart is empty. Add items from the menu.</div>`;
+  } else {
+    root.innerHTML = state.cart.map(i=>`
+      <div class="cart-item">
+        <div class="name">${escapeHtml(i.name)}</div>
+        <div class="sub">${escapeHtml(i.optionLabel)} · $${money(i.price)} each · Qty ${i.qty}</div>
+        <div class="actions">
+          <button class="smallbtn" onclick="dec('${i.key}')">−</button>
+          <button class="smallbtn" onclick="inc('${i.key}')">+</button>
+          <button class="smallbtn danger" onclick="removeItem('${i.key}')">Remove</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  const sub = cartSubtotal();
+  const tax = (sub + (sub>0?DELIVERY_FEE:0)) * HST_RATE;
+  const total = sub + (sub>0?DELIVERY_FEE:0) + (sub>0?tax:0);
+
+  document.getElementById("subTotal").innerText = money(sub);
+  document.getElementById("hst").innerText = money(sub>0?tax:0);
+  document.getElementById("grandTotal").innerText = money(sub>0?total:0);
+  document.getElementById("deliveryFee").innerText = money(DELIVERY_FEE);
+
+  const lead = cartLeadMins();
+  const pill = document.getElementById("leadPill");
+  if(lead<=0) pill.innerText="Lead time: —";
+  else if(lead>=1440) pill.innerText="Lead time: ≥ 1 day";
+  else if(lead<60) pill.innerText="Lead time: ~ "+lead+" mins";
+  else pill.innerText="Lead time: ~ "+Math.ceil(lead/60)+" hours";
+
+  validateSchedule();
+}
+
+function toggleSchedule(){
+  const when = document.querySelector('input[name="when"]:checked')?.value || "asap";
+  document.getElementById("scheduleFields").style.display = (when==="schedule") ? "block" : "none";
+  validateSchedule();
+}
+
+function validateSchedule(){
+  const warn = document.getElementById("leadWarn");
+  const lead = cartLeadMins();
+  const when = document.querySelector('input[name="when"]:checked')?.value || "asap";
+
+  if(state.cart.length===0){ warn.style.display="none"; return true; }
+
+  if(when==="asap"){ 
+    if(lead>=1440){ 
+      warn.style.display="block";
+      warn.innerText="One or more items require at least 1 day advance notice. Please choose “Schedule preorder” and select tomorrow or later.";
+      return false;
+    }
+    warn.style.display="none";
+    return true;
+  }
+
+  const d = document.getElementById("scheduleDate").value;
+  const t = document.getElementById("scheduleTime").value;
+  if(!d || !t){
+    warn.style.display="block";
+    warn.innerText="Please select both a delivery date and time.";
+    return false;
+  }
+
+  const selected = new Date(d+"T"+t);
+  const now = new Date();
+  const minTime = new Date(now.getTime() + lead*60000);
+
+  if(selected.getTime() < minTime.getTime()){ 
+    warn.style.display="block";
+    warn.innerText="Selected time is too soon for required lead time based on your items. Choose a later time.";
+    return false;
+  }
+
+  if(lead>=1440){
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1);
+    if(selected.getTime() < tomorrow.getTime()){ 
+      warn.style.display="block";
+      warn.innerText="This order requires at least 1 day advance notice. Please select tomorrow or later.";
+      return false;
+    }
+  }
+
+  warn.style.display="none";
+  return true;
+}
+
+function orderSummaryText(){
+  return state.cart.map(i=>`${i.qty}× ${i.name} (${i.optionLabel}) — $${money(i.price*i.qty)}`).join("\n");
+}
+
+function getWhenText(){
+  const when = document.querySelector('input[name="when"]:checked')?.value || "asap";
+  if(when==="asap") return "ASAP";
+  const d = document.getElementById("scheduleDate").value || "";
+  const t = document.getElementById("scheduleTime").value || "";
+  return ("Scheduled preorder: "+d+" "+t).trim();
+}
+
+function checkoutEmail(){
+  if(state.cart.length===0){ alert("Add items to your cart first."); return; }
+  if(!validateSchedule()){ alert("Please fix the scheduling requirements shown in the cart."); return; }
+
+  const name = document.getElementById("custName").value.trim();
+  const phone = document.getElementById("custPhone").value.trim();
+  const email = document.getElementById("custEmail").value.trim();
+  const address = document.getElementById("custAddress").value.trim();
+  const notes = document.getElementById("custNotes").value.trim();
+
+  if(!name || !phone || !address){ alert("Please enter your name, phone, and delivery address."); return; }
+
+  const sub = cartSubtotal();
+  const tax = (sub + DELIVERY_FEE) * HST_RATE;
+  const total = sub + DELIVERY_FEE + tax;
+
+  const body = [
+    "HOÀNG GIA PHỞ – NEW DELIVERY ORDER",
+    "",
+    "Customer:",
+    `Name: ${name}`,
+    `Phone: ${phone}`,
+    email ? `Email: ${email}` : "",
+    `Address: ${address}`,
+    notes ? `Notes: ${notes}` : "",
+    "",
+    `When: ${getWhenText()}`,
+    "",
+    "Items:",
+    orderSummaryText(),
+    "",
+    `Subtotal: $${money(sub)}`,
+    `Delivery: $${money(DELIVERY_FEE)}`,
+    `HST (13%): $${money(tax)}`,
+    `TOTAL: $${money(total)}`
+  ].filter(Boolean).join("\n");
+
+  const subject = encodeURIComponent("Hoàng Gia Phở – Delivery Order");
+  window.location.href = "mailto:orders@hoanggiapho.ca?subject="+subject+"&body="+encodeURIComponent(body);
+}
+
+function checkoutWhatsApp(){
+  if(state.cart.length===0){ alert("Add items to your cart first."); return; }
+  if(!validateSchedule()){ alert("Please fix the scheduling requirements shown in the cart."); return; }
+
+  const name = document.getElementById("custName").value.trim();
+  const phone = document.getElementById("custPhone").value.trim();
+  const address = document.getElementById("custAddress").value.trim();
+  const notes = document.getElementById("custNotes").value.trim();
+
+  if(!name || !phone || !address){ alert("Please enter your name, phone, and delivery address."); return; }
+
+  const sub = cartSubtotal();
+  const tax = (sub + DELIVERY_FEE) * HST_RATE;
+  const total = sub + DELIVERY_FEE + tax;
+
+  const text = [
+    "HOÀNG GIA PHỞ – DELIVERY ORDER",
+    `Name: ${name}`,
+    `Phone: ${phone}`,
+    `Address: ${address}`,
+    notes ? `Notes: ${notes}` : "",
+    `When: ${getWhenText()}`,
+    "",
+    "Items:",
+    orderSummaryText(),
+    "",
+    `Total: $${money(total)} (incl. HST + delivery)`,
+    "",
+    `Restaurant: +1 (289) 698-2958`
+  ].filter(Boolean).join("\n");
+
+  window.open("https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(text), "_blank");
+}
+
+document.getElementById("searchInput").addEventListener("input",(e)=>{
+  state.search = e.target.value || "";
+  renderMenu();
+});
+
+(function initScheduleDefaults(){
+  const now = new Date();
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1);
+  document.getElementById("scheduleDate").valueAsDate = tomorrow;
+  document.getElementById("scheduleTime").value = "12:00";
+})();
+
+function renderAll(){ renderChips(); renderMenu(); renderCart(); }
+renderAll();
+
+/* v2: mobile cart drawer toggle */
+(function(){
+  const cart = document.getElementById('cartPanel');
+  const btn = document.getElementById('cartToggleBtn');
+  const bar = cart ? cart.querySelector('.cart-mobile-bar') : null;
+  if(!cart || !btn || !bar) return;
+
+  const mq = window.matchMedia('(max-width: 980px)');
+  const setState = (collapsed) => {
+    cart.classList.toggle('collapsed', collapsed);
+    btn.textContent = collapsed ? 'Open' : 'Hide';
+    btn.setAttribute('aria-expanded', String(!collapsed));
+  };
+
+  // Default collapsed on mobile, expanded on desktop
+  const syncForViewport = () => setState(mq.matches);
+  syncForViewport();
+
+  const toggle = (e) => {
+    // If user clicked the button or bar, toggle
+    e && e.preventDefault();
+    setState(!cart.classList.contains('collapsed'));
+  };
+
+  btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(e); });
+  bar.addEventListener('click', toggle);
+  bar.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ toggle(e); } });
+
+  mq.addEventListener ? mq.addEventListener('change', syncForViewport) : mq.addListener(syncForViewport);
+})();
+
+</script>
+
+</body>
+</html>
