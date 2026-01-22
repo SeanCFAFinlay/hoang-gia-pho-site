@@ -274,6 +274,12 @@ const HST_RATE = 0.13;
 const PHONE_DISPLAY = "+1 (289) 698-2958";
 const WHATSAPP_NUMBER = "12896982958";
 
+    // Email to send the e‑transfer receipt/invoice.
+    // When a customer checks out via e‑transfer, an email containing the order
+    // details will be composed and addressed to this recipient. Update this
+    // address if invoices should go elsewhere.
+    const ETRANSFER_RECEIPT_EMAIL = "tuan@asianpersuasion.ca";
+
 const state = {
   cart: [],
   search: "",
@@ -688,7 +694,38 @@ function checkoutEtransfer(){
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(instruction).catch(()=>{});
   }
-  alert(instruction);
+      alert(instruction);
+
+      // After showing the e‑transfer instructions, compose an email to the
+      // designated receipt/invoice address. This email contains the order
+      // details and notifies that the customer has been instructed to send
+      // payment via Interac e‑Transfer. Opening a `mailto:` link will open
+      // the user's default email client with the subject and body prefilled.
+      const etransferSubject = encodeURIComponent("Hoàng Gia Phở – E‑Transfer Order");
+      const etransferBody = encodeURIComponent([
+        "HOÀNG GIA PHỞ – NEW E‑TRANSFER DELIVERY ORDER",
+        "",
+        "Customer:",
+        `Name: ${name}`,
+        `Phone: ${phone}`,
+        `Address: ${address}`,
+        notes ? `Notes: ${notes}` : "",
+        `When: ${getWhenText()}`,
+        "",
+        "Items:",
+        orderSummaryText(),
+        "",
+        `Subtotal: $${money(sub)}`,
+        `Delivery: $${money(DELIVERY_FEE)}`,
+        `HST (13%): $${money(tax)}`,
+        `TOTAL: $${money(total)}`,
+        "",
+        `Customer has been instructed to send an e‑Transfer of $${money(total)} CAD to ${ETRANSFER_EMAIL}.`
+      ].filter(Boolean).join("\n"));
+      window.location.href =
+        "mailto:" + ETRANSFER_RECEIPT_EMAIL +
+        "?subject=" + etransferSubject +
+        "&body=" + etransferBody;
 }
 
 document.getElementById("searchInput").addEventListener("input",(e)=>{
